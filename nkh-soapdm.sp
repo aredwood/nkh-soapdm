@@ -20,7 +20,9 @@ new statistics[65][9];
 		- 2 Kills
 		- 3 Assists
 		- 4 Deaths
-
+		- 5 Shots Fires
+		- 6 Shots Hit
+		//ADD KPD,DPM,SHR
 
 	*/
 new healthArray[MAXPLAYERS + 1];
@@ -29,6 +31,12 @@ public OnPluginStart(){
 	HookEvent("player_hurt",Event_player_hurt);
 	HookEvent("player_death",Event_player_death);
 	RegConsoleCmd("soapstats",soapstats_menu);
+	HookEvent("player_shoot",Event_player_shoot);
+	CreateTimer(60.0,timeCounter,_,TIMER_REPEAT);
+}
+new minutes = 1;
+public Action:timeCounter(Handle:timer){
+	minutes++;
 }
 //When player loads in, wipe stats.
 public OnClientPutInServer(client){
@@ -42,14 +50,17 @@ public OnClientDisconnect(client){
 		statistics[client][i] = 0;
 	}
 }
-
-public OnGameFrame()
-{
+//Update health array every tick
+public OnGameFrame(){
 	for(new tmp = 1; tmp <= MaxClients; tmp++){
 		if(IsClientInGame(tmp)){
 			healthArray[tmp] = GetClientHealth(tmp);
 		}
 	}
+}
+public Action:Event_player_shoot(Handle:event,String:name[],bool:Broadcast){
+	new shooter = GetClientOfUserId(GetEventInt(event,"userid"));
+	statistics[shooter][5]++;
 }
 public Action:Event_player_hurt(Handle:event,String:name[],bool:Broadcast){
 	new victim = GetClientOfUserId(GetEventInt(event,"userid"));
@@ -69,67 +80,107 @@ public Action:Event_player_hurt(Handle:event,String:name[],bool:Broadcast){
 			statistics[attacker][0] = statistics[attacker][0] + damage;
 		}
 	}
+	statistics[victim][6]++;
 }
 public Action:Event_player_death(Handle:event,String:name[],bool:Broadcast){
 	new victim = GetClientOfUserId(GetEventInt(event,"userid"));
 	new killer = GetClientOfUserId(GetEventInt(event,"attacker"));
 	new assister = GetEventInt(event,"assister");
 
-	statistics[victim][4] = statistics[victim][4] + 1;
-	statistics[killer][2] = statistics[killer][2] + 1;
+	statistics[victim][4]++;
+	statistics[killer][2]++;
 	if(assister > 0){
-		statistics[assister][3] = statistics[assister][3] + 1;
+		statistics[assister][3]++;
 	}
 }
 
 public soapstats_menuHandler(Handle:menu,MenuAction:action,argOne,argTwo){
 	//We don't really need to handle actions, it's fine it this stays empty.
 }
+align(String:inputString[64]){
+	new needed = 26 - strlen(inputString);
+	switch(needed){
+		case 1:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-"," ",false);
+		}
+		case 2:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","  ",false);
+		}
+		case 3:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","   ",false);
+		}
+		case 4:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","    ",false);
+		}
+		case 5:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","     ",false);
+		}
+		case 6:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","      ",false);
+		}
+		case 7:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","       ",false);
+		}
+		case 8:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","        ",false);
+		}
+		case 9:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","         ",false);
+		}
+		case 10:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","          ",false);
+		}
+	}
+	return true;
+}
 showMenu(client){
 	new Handle:menu = CreateMenu(soapstats_menuHandler);
 	SetMenuTitle(menu,"nKH! Statistics");
-	//Damage
-	/*new String:damagePrint[16];
-	Format(damagePrint,sizeof(damagePrint),"DMG: %i",statistics[client][0]);
-	AddMenuItem(menu,"",damagePrint);
 
-	new String:lineOne[32];
-	Format(lineOne,sizeof(lineOne),"DMG: %i      DT: %i",statistics[client][0],statistics[client][1]);
-	AddMenuItem(menu,"",lineOne,);
-	//DamageTaken
-	new String:damageTakenPrint[16];
-	Format(damageTakenPrint,sizeof(damageTakenPrint),"DT: %i",statistics[client][1]);
-	AddMenuItem(menu,"",damageTakenPrint);
-	//Kills
-	new String:killsPrint[16];
-	Format(killsPrint,sizeof(killsPrint),"K: %i",statistics[client][2]);
-	AddMenuItem(menu,"",killsPrint);
-	//Assists
-	new String:assistsPrint[16];
-	Format(assistsPrint,sizeof(assistsPrint),"A: %i",statistics[client][3]);
-	AddMenuItem(menu,"",assistsPrint);
-	//Deaths
-	new String:deathPrint[16];
-	Format(deathPrint,sizeof(deathPrint),"D: %i",statistics[client][4]);
-	AddMenuItem(menu,"",deathPrint);
-	//KD
-	new String:KDPrint[16];
-	Format(KDPrint,sizeof(KDPrint),"KD: %.2f",(float(statistics[client][2]) / float(statistics[client][4])));
-	AddMenuItem(menu,"",KDPrint);*/
-	new String:blockOne[128] = "Your stats \n";
+
+
+
+
+	new String:blockOne[256] = "Your stats \n";
 		//first line
-		new String:damageLine[32];
-		Format(damageLine,sizeof(damageLine),"    DMG: %i     DT: %i\n",statistics[client][0],statistics[client][1]);
+		new String:damageLine[64];
+		Format(damageLine,sizeof(damageLine),"    DMG: %i - DT: %i\n",statistics[client][0],statistics[client][1]);
+		align(damageLine);
 		StrCat(blockOne,sizeof(blockOne),damageLine);
 
 		//second line
-		new String:killDeathLine[32];
-		Format(killDeathLine,sizeof(killDeathLine),"    K: %i        D: %i\n",statistics[client][2],statistics[client][4]);
+		new String:damageCalcLine[64];
+		if(statistics[client][4] > 0){
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f - DPD: *\n",(float(statistics[client][0]) / float(minutes)));
+		}
+		else{
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f - DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
+		}
+		align(damageCalcLine);
+		StrCat(blockOne,sizeof(blockOne),damageCalcLine);
+		
+
+
+		//third  line
+		new String:killDeathLine[64];
+		Format(killDeathLine,sizeof(killDeathLine),"    K: %i - D: %i\n",statistics[client][2],statistics[client][4]);
+		align(killDeathLine);
 		StrCat(blockOne,sizeof(blockOne),killDeathLine);
 
-		//third line
-		new String:assistsKDLine[32];
-		Format(assistsKDLine,sizeof(assistsKDLine),"    A: %i       KD: %.2f\n",statistics[client][3],(float(statistics[client][2]) / float(statistics[client][4])));
+		//fourth line
+		new String:assistsKDLine[64];
+		Format(assistsKDLine,sizeof(assistsKDLine),"    A: %i - KD: %.2f\n",statistics[client][3],(float(statistics[client][2]) / float(statistics[client][4])));
+		align(assistsKDLine);
 		StrCat(blockOne,sizeof(blockOne),assistsKDLine);
 
 	AddMenuItem(menu,"",blockOne);
