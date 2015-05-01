@@ -95,50 +95,90 @@ public Action:Event_player_death(Handle:event,String:name[],bool:Broadcast){
 }
 
 public soapstats_menuHandler(Handle:menu,MenuAction:action,argOne,argTwo){
-	//We don't really need to handle actions, it's fine it this stays empty.
+	//We don't really need to handle actions, it's fine if this stays empty.
 }
 align(String:inputString[64]){
-	new needed = 26 - strlen(inputString);
+	new needed = 16 - StrContains(inputString,"-",false);
 	switch(needed){
 		case 1:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-"," ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","  ",false);
 		}
 		case 2:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","  ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","   ",false);
 		}
 		case 3:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","   ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","    ",false);
 		}
 		case 4:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","    ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","     ",false);
 		}
 		case 5:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","     ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","      ",false);
 		}
 		case 6:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","      ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","       ",false);
 		}
 		case 7:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","       ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","        ",false);
 		}
 		case 8:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","        ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","         ",false);
 		}
 		case 9:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","         ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","          ",false);
 		}
 		case 10:
 		{
-			ReplaceString(inputString,sizeof(inputString),"-","          ",false);
+			ReplaceString(inputString,sizeof(inputString),"-","            ",false);
+		}
+		case 11:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","             ",false);
+		}
+		case 12:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","              ",false);
+		}
+		case 13:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","               ",false);
+		}
+		case 14:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                ",false);
+		}
+		case 15:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                 ",false);
+		}
+		case 16:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                  ",false);
+		}
+		case 17:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                   ",false);
+		}
+		case 18:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                    ",false);
+		}
+		case 19:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                     ",false);
+		}
+		case 20:
+		{
+			ReplaceString(inputString,sizeof(inputString),"-","                      ",false);
 		}
 	}
 	return true;
@@ -154,17 +194,17 @@ showMenu(client){
 	new String:blockOne[256] = "Your stats \n";
 		//first line
 		new String:damageLine[64];
-		Format(damageLine,sizeof(damageLine),"    DMG: %i - DT: %i\n",statistics[client][0],statistics[client][1]);
+		Format(damageLine,sizeof(damageLine),"    DMG: %i -DT: %i\n",statistics[client][0],statistics[client][1]);
 		align(damageLine);
 		StrCat(blockOne,sizeof(blockOne),damageLine);
 
 		//second line
 		new String:damageCalcLine[64];
 		if(statistics[client][4] > 0){
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f - DPD: *\n",(float(statistics[client][0]) / float(minutes)));
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: *\n",(float(statistics[client][0]) / float(minutes)));
 		}
 		else{
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f - DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
 		}
 		align(damageCalcLine);
 		StrCat(blockOne,sizeof(blockOne),damageCalcLine);
@@ -173,13 +213,13 @@ showMenu(client){
 
 		//third  line
 		new String:killDeathLine[64];
-		Format(killDeathLine,sizeof(killDeathLine),"    K: %i - D: %i\n",statistics[client][2],statistics[client][4]);
+		Format(killDeathLine,sizeof(killDeathLine),"    K: %i -D: %i\n",statistics[client][2],statistics[client][4]);
 		align(killDeathLine);
 		StrCat(blockOne,sizeof(blockOne),killDeathLine);
 
 		//fourth line
 		new String:assistsKDLine[64];
-		Format(assistsKDLine,sizeof(assistsKDLine),"    A: %i - KD: %.2f\n",statistics[client][3],(float(statistics[client][2]) / float(statistics[client][4])));
+		Format(assistsKDLine,sizeof(assistsKDLine),"    A: %i -KD: %.2f\n",statistics[client][3],(float(statistics[client][2]) / float(statistics[client][4])));
 		align(assistsKDLine);
 		StrCat(blockOne,sizeof(blockOne),assistsKDLine);
 
