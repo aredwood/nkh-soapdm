@@ -32,7 +32,9 @@ public OnPluginStart(){
 	HookEvent("player_death",Event_player_death);
 	RegConsoleCmd("soapstats",soapstats_menu);
 	HookEvent("player_shoot",Event_player_shoot);
+	HookEvent("teamplay_round_win",Event_teamplayer_round_win);
 	CreateTimer(60.0,timeCounter,_,TIMER_REPEAT);
+	//CreateTimer(5.0,calcTop,_,TIMER_REPEAT);
 }
 new minutes = 1;
 public Action:timeCounter(Handle:timer){
@@ -92,8 +94,35 @@ public Action:Event_player_death(Handle:event,String:name[],bool:Broadcast){
 	if(assister > 0){
 		statistics[assister][3]++;
 	}
-}
+}	
+/*new posOne;
+new posTwo;
+new posThree;
+public calcTop(Handle:timer){
+	for(new i = 1; i <= MaxClients;i++){
+		if(IsClientInGame(i)){
+			if(statistics[i][0] > statistics[posOne][0]){
+				posOne = i;
+			}
+		}
+	}
+	for(new i = 1; i <= MaxClients;i++){
+		if(IsClientInGame(i)){
+			if(statistics[i][0] > statistics[posTwo][0] && statistics[i][0] < statistics[posOne]){
+				posTwo = i;
+			}
+		}
+	}
+	for(new i = 1; i <= MaxClients;i++){
+		if(IsClientInGame(i)){
+			if(statistics[i][0] > statistics[posThree][0] && statistics[i][0] < statistics[posTwo][0] && statistics[i][0] < statistics[posOne][0]){
+				posThree = i;
+			}
+		}
+	}
 
+
+}*/
 public soapstats_menuHandler(Handle:menu,MenuAction:action,argOne,argTwo){
 	//We don't really need to handle actions, it's fine if this stays empty.
 }
@@ -194,37 +223,41 @@ showMenu(client){
 	new String:blockOne[256] = "Your stats \n";
 		//first line
 		new String:damageLine[64];
-		Format(damageLine,sizeof(damageLine),"    DMG: %i -DT: %i\n",statistics[client][0],statistics[client][1]);
+		Format(damageLine,sizeof(damageLine),"    DMG: %i -DMG Taken: %i\n",statistics[client][0],statistics[client][1]);
 		align(damageLine);
 		StrCat(blockOne,sizeof(blockOne),damageLine);
 
 		//second line
 		new String:damageCalcLine[64];
 		if(statistics[client][4] > 0){
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: *\n",(float(statistics[client][0]) / float(minutes)));
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
 		}
 		else{
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
+
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: 0.00\n",(float(statistics[client][0]) / float(minutes)));
 		}
 		align(damageCalcLine);
 		StrCat(blockOne,sizeof(blockOne),damageCalcLine);
-		
-
 
 		//third  line
 		new String:killDeathLine[64];
-		Format(killDeathLine,sizeof(killDeathLine),"    K: %i -D: %i\n",statistics[client][2],statistics[client][4]);
+		Format(killDeathLine,sizeof(killDeathLine),"    Kills: %i -Assists: %i\n",statistics[client][2],statistics[client][3]);
 		align(killDeathLine);
 		StrCat(blockOne,sizeof(blockOne),killDeathLine);
 
 		//fourth line
 		new String:assistsKDLine[64];
-		Format(assistsKDLine,sizeof(assistsKDLine),"    A: %i -KD: %.2f\n",statistics[client][3],(float(statistics[client][2]) / float(statistics[client][4])));
+		if(statistics[client][4] > 0){
+			Format(assistsKDLine,sizeof(assistsKDLine),"    Deaths: %i -Kills/Death: %.2f\n",statistics[client][4],(float(statistics[client][2]) / float(statistics[client][4])));
+		}
+		else{
+			Format(assistsKDLine,sizeof(assistsKDLine),"    Deaths: %i -Kills/Death: 0.00",statistics[client][4]);
+		}
+		
 		align(assistsKDLine);
 		StrCat(blockOne,sizeof(blockOne),assistsKDLine);
 
 	AddMenuItem(menu,"",blockOne);
-
 
 	SetMenuExitButton(menu,true);
 
@@ -235,4 +268,11 @@ public Action:soapstats_menu(client,args){
 	showMenu(client);
 	return Plugin_Handled;
 
+}
+public Action:Event_teamplayer_round_win(Handle:event,String:name[],bool:Broadcast){
+	for(new i = 0; i <= MaxClients;i++){
+		if(IsClientInGame(i)){
+			showMenu(i);
+		}
+	}
 }
