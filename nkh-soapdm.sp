@@ -4,11 +4,11 @@
 #include <morecolors>
 
 public Plugin:myinfo = {
-	name = "nKH! detergent",
+	name = "nKH! DM Statistics",
 	author = "da_apple",
-	description = "cleans shit",
+	description = "11.4g of sugar, per 30g of fruit loops",
 	url = "http://steamcommunity.com/groups/nokidshere",
-	version="1.0"
+	version="6.9"
 }
 /*
 	Global Variables.
@@ -22,6 +22,7 @@ new statistics[65][9];
 		- 4 Deaths
 		- 5 Shots Fires
 		- 6 Shots Hit
+		- 7 Minutes
 		//ADD KPD,DPM,SHR
 
 	*/
@@ -38,17 +39,19 @@ public OnPluginStart(){
 }
 new minutes = 1;
 public Action:timeCounter(Handle:timer){
-	minutes++;
+	for(new i = 0; i < MAXPLAYERS; i++){
+		statistics[i][7] += 1;
+	}
 }
 //When player loads in, wipe stats.
 public OnClientPutInServer(client){
-	for(new i = 0; i <= 8;i++){
+	for(new i = 0; i < 9;i++){
 		statistics[client][i] = 0;
 	}
 }
 //When player disconnects, wipe stats.
 public OnClientDisconnect(client){
-	for(new i = 0; i <= 8;i++){
+	for(new i = 0; i < 9;i++){
 		statistics[client][i] = 0;
 	}
 }
@@ -95,34 +98,7 @@ public Action:Event_player_death(Handle:event,String:name[],bool:Broadcast){
 		statistics[assister][3]++;
 	}
 }	
-/*new posOne;
-new posTwo;
-new posThree;
-public calcTop(Handle:timer){
-	for(new i = 1; i <= MaxClients;i++){
-		if(IsClientInGame(i)){
-			if(statistics[i][0] > statistics[posOne][0]){
-				posOne = i;
-			}
-		}
-	}
-	for(new i = 1; i <= MaxClients;i++){
-		if(IsClientInGame(i)){
-			if(statistics[i][0] > statistics[posTwo][0] && statistics[i][0] < statistics[posOne]){
-				posTwo = i;
-			}
-		}
-	}
-	for(new i = 1; i <= MaxClients;i++){
-		if(IsClientInGame(i)){
-			if(statistics[i][0] > statistics[posThree][0] && statistics[i][0] < statistics[posTwo][0] && statistics[i][0] < statistics[posOne][0]){
-				posThree = i;
-			}
-		}
-	}
 
-
-}*/
 public soapstats_menuHandler(Handle:menu,MenuAction:action,argOne,argTwo){
 	//We don't really need to handle actions, it's fine if this stays empty.
 }
@@ -230,11 +206,11 @@ showMenu(client){
 		//second line
 		new String:damageCalcLine[64];
 		if(statistics[client][4] > 0){
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: %.2f\n",(float(statistics[client][0]) / float(minutes)),(float(statistics[client][0]) / float(statistics[client][4])));
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: %.2f\n",(float(statistics[client][0]) / float(statistics[client][7])),(float(statistics[client][0]) / float(statistics[client][4])));
 		}
 		else{
 
-			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: 0.00\n",(float(statistics[client][0]) / float(minutes)));
+			Format(damageCalcLine,sizeof(damageCalcLine),"    DPM: %.2f -DPD: 0.00\n",(float(statistics[client][0]) / float(statistics[client][7])));
 		}
 		align(damageCalcLine);
 		StrCat(blockOne,sizeof(blockOne),damageCalcLine);
@@ -270,7 +246,7 @@ public Action:soapstats_menu(client,args){
 
 }
 public Action:Event_teamplayer_round_win(Handle:event,String:name[],bool:Broadcast){
-	for(new i = 0; i <= MaxClients;i++){
+	for(new i = 0; i <= MAXPLAYERS;i++){
 		if(IsClientInGame(i)){
 			showMenu(i);
 		}
